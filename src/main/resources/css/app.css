@@ -1,0 +1,40 @@
+.root-pane {
+    -fx-background-color: -color-bg-default;
+}
+
+.cabecera {
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-color: transparent transparent -color-border-default transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.titulo {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-default;
+}
+
+.subtitulo {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-fg-muted;
+}
+
+.tarjeta {
+    -fx-background-color: -color-bg-subtle;
+    -fx-background-radius: 10;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 10;
+    -fx-padding: 16;
+}
+
+.tarjeta-titulo {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-muted;
+}
+
+.barra-estado {
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-color: -color-border-default transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}

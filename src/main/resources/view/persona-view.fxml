@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.crudpersona.controller.PersonaController"
+            styleClass="root-pane"
+            prefWidth="980.0" prefHeight="660.0">
+
+    <top>
+        <VBox styleClass="cabecera" spacing="4.0">
+            <padding><Insets top="18.0" right="24.0" bottom="14.0" left="24.0"/></padding>
+            <Label text="Gestión de Personas" styleClass="titulo"/>
+            <Label text="Spring Boot + JPA + Lombok + SQLite" styleClass="subtitulo"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="14.0">
+            <padding><Insets top="16.0" right="24.0" bottom="10.0" left="24.0"/></padding>
+
+            <VBox styleClass="tarjeta" spacing="12.0">
+                <Label text="Datos de la persona" styleClass="tarjeta-titulo"/>
+
+                <GridPane hgap="14.0" vgap="10.0">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="90.0"/>
+                        <ColumnConstraints prefWidth="240.0"/>
+                        <ColumnConstraints minWidth="90.0"/>
+                        <ColumnConstraints prefWidth="240.0"/>
+                    </columnConstraints>
+
+                    <Label text="ID" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtId" editable="false" promptText="(automatico)"
+                               GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                    <Label text="DNI *" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                    <TextField fx:id="txtDni" promptText="8 digitos"
+                               GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                    <Label text="Nombre *" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtNombre"
+                               GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                    <Label text="Apellido *" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                    <TextField fx:id="txtApellido"
+                               GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                    <Label text="Correo" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtEmail" promptText="opcional"
+                               GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                    <Label text="Telefono" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                    <TextField fx:id="txtTelefono" promptText="9 digitos (opcional)"
+                               GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+                </GridPane>
+
+                <Separator/>
+
+                <HBox spacing="10.0">
+                    <Button fx:id="btnNuevo" text="Nuevo" onAction="#onNuevo" styleClass="button-outlined"/>
+                    <Button fx:id="btnGuardar" text="Guardar" onAction="#onGuardar"
+                            styleClass="accent" defaultButton="true"/>
+                    <Button fx:id="btnEliminar" text="Eliminar" onAction="#onEliminar" styleClass="danger"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <TextField fx:id="txtBuscar" prefWidth="280.0"
+                               promptText="Buscar por nombre, apellido o DNI"/>
+                </HBox>
+            </VBox>
+
+            <VBox styleClass="tarjeta" spacing="10.0" VBox.vgrow="ALWAYS">
+                <Label text="Registros" styleClass="tarjeta-titulo"/>
+
+                <TableView fx:id="tabla" VBox.vgrow="ALWAYS" styleClass="striped">
+                    <columns>
+                        <TableColumn fx:id="colId"       text="ID"       prefWidth="60.0"/>
+                        <TableColumn fx:id="colNombre"   text="Nombre"   prefWidth="180.0"/>
+                        <TableColumn fx:id="colApellido" text="Apellido" prefWidth="180.0"/>
+                        <TableColumn fx:id="colDni"      text="DNI"      prefWidth="110.0"/>
+                        <TableColumn fx:id="colEmail"    text="Correo"   prefWidth="220.0"/>
+                        <TableColumn fx:id="colTelefono" text="Telefono" prefWidth="120.0"/>
+                    </columns>
+                </TableView>
+
+                <HBox spacing="10.0" alignment="CENTER_RIGHT">
+                    <Label fx:id="lblPagina" text="Pagina 1 de 1"/>
+                    <Button fx:id="btnAnterior" text="Anterior"
+                            onAction="#onAnterior" styleClass="button-outlined"/>
+                    <Button fx:id="btnSiguiente" text="Siguiente"
+                            onAction="#onSiguiente" styleClass="button-outlined"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox styleClass="barra-estado">
+            <padding><Insets top="8.0" right="24.0" bottom="10.0" left="24.0"/></padding>
+            <Label fx:id="lblEstado" text="Listo."/>
+        </HBox>
+    </bottom>
+</BorderPane>
