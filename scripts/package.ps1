@@ -46,7 +46,7 @@ try {
     }
     $arguments = @('--type', $Type, '--name', 'GestionPersonas', '--app-version', $version,
         '--input', $inputDirectory, '--main-jar', $jarName, '--dest', $destination,
-        '--description', 'Gestión de personas con JavaFX y Supabase PostgreSQL',
+        '--description', 'Gestión de personas con JavaFX y SQLite',
         '--java-options', '-Dfile.encoding=UTF-8')
     # El JAR Spring Boot usa JarLauncher en Main-Class y Launcher en Start-Class.
     # jpackage toma Main-Class directamente del manifiesto.

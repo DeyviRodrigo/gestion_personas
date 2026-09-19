@@ -35,9 +35,9 @@ public class JavaFxApplication extends Application {
             Alert aviso = new Alert(Alert.AlertType.ERROR);
             aviso.setTitle("Gestión de Personas");
             aviso.setHeaderText("No se pudo iniciar la aplicación");
-            aviso.setContentText("Comprueba que la base PostgreSQL esté disponible y revisa la configuración en "
-                    + System.getProperty("user.home") + "/.gestion-personas/database.properties. "
-                    + "Consulta el README del proyecto para configurar la conexión y las migraciones.");
+            aviso.setContentText("Comprueba los permisos de la carpeta "
+                    + System.getProperty("user.home") + "/.gestion-personas y que el archivo SQLite sea válido. "
+                    + "Consulta el README del proyecto para revisar la configuración y los respaldos.");
             aviso.showAndWait();
             Platform.exit();
             return;

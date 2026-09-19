@@ -4,7 +4,7 @@ import com.example.crudpersona.exception.NegocioException;
 import com.example.crudpersona.dto.PersonaDto;
 import com.example.crudpersona.model.Persona;
 import com.example.crudpersona.mapper.PersonaMapper;
-import com.example.crudpersona.support.PostgresTestDatabase;
+import com.example.crudpersona.support.SqliteTestDatabase;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import com.example.crudpersona.repository.PersonaRepository;
 import jakarta.validation.ConstraintViolationException;
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.*;
 @SpringBootTest(properties = {"spring.jpa.show-sql=false", "logging.level.org.hibernate.SQL=WARN"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class PersonaServiceIntegrationTest {
-    @RegisterExtension static PostgresTestDatabase database = new PostgresTestDatabase();
+    @RegisterExtension static SqliteTestDatabase database = new SqliteTestDatabase();
     @Autowired PersonaMapper mapper;
     @Autowired PersonaService service;
     @Autowired PersonaRepository repository;
@@ -74,12 +74,12 @@ class PersonaServiceIntegrationTest {
     }
 
     @Test
-    void postgresTambienImpideDniDuplicado() {
+    void sqliteTambienImpideDniDuplicado() {
         service.guardar(persona("12345678"));
         Persona duplicada = new Persona();
         mapper.actualizar(persona("12345678"), duplicada);
         assertThatThrownBy(() -> repository.saveAndFlush(duplicada))
-                .isInstanceOf(DataAccessException.class).hasMessageContaining("uk_persona_dni");
+                .isInstanceOf(DataAccessException.class).hasMessageContaining("UNIQUE");
         assertThat(service.contar()).isEqualTo(1);
     }
 

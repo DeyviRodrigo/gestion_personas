@@ -4,17 +4,16 @@ import com.example.crudpersona.dto.PersonaDto;
 import com.example.crudpersona.service.PersonaService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import com.example.crudpersona.support.PostgresTestDatabase;
+import com.example.crudpersona.support.SqliteTestDatabase;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PersistenceRestartTest {
-    @RegisterExtension static PostgresTestDatabase database = new PostgresTestDatabase();
+    @RegisterExtension static SqliteTestDatabase database = new SqliteTestDatabase();
 
     @Test
     void conservaLosDatosAlCerrarYReabrir() {

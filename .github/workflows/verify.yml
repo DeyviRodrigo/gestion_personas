@@ -19,7 +19,7 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
-      - name: Compilar y probar con PostgreSQL temporal
+      - name: Compilar y probar con SQLite temporal
         run: .\mvnw.cmd --batch-mode --no-transfer-progress clean verify
       - name: Guardar informes
         if: always()

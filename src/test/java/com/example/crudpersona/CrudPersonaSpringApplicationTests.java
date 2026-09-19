@@ -5,8 +5,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import com.example.crudpersona.support.PostgresTestDatabase;
-import java.nio.file.Path;
+import com.example.crudpersona.support.SqliteTestDatabase;
 import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest
@@ -14,7 +13,7 @@ import org.springframework.test.annotation.DirtiesContext;
 class CrudPersonaSpringApplicationTests {
 
 	@RegisterExtension
-	static PostgresTestDatabase database = new PostgresTestDatabase();
+	static SqliteTestDatabase database = new SqliteTestDatabase();
 
 	@DynamicPropertySource
 	static void baseDePrueba(DynamicPropertyRegistry registry) {

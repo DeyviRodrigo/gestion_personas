@@ -15,8 +15,8 @@ import java.util.Optional;
 public class AuditoriaConfig {
     @Bean
     DateTimeProvider relojAuditoria() {
-        // PostgreSQL conserva microsegundos: el DTO y la lectura posterior deben coincidir.
-        return () -> Optional.of(Instant.now().truncatedTo(ChronoUnit.MICROS));
+        // SQLite JDBC conserva milisegundos: el DTO y la lectura posterior deben coincidir.
+        return () -> Optional.of(Instant.now().truncatedTo(ChronoUnit.MILLIS));
     }
 
     @Bean
