@@ -39,3 +39,10 @@ build/
 *.db-journal
 instalador/
 .tools/
+node_modules/
+.env
+.env.*
+!.env.example
+backups/
+supabase/.temp/
+supabase/.branches/

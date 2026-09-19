@@ -1,0 +1,32 @@
+name: Verificar proyecto
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Compilar y probar con PostgreSQL temporal
+        run: .\mvnw.cmd --batch-mode --no-transfer-progress clean verify
+      - name: Guardar informes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: informes-pruebas
+          path: |
+            target/surefire-reports/
+            target/vista-personas-v2.png
+            target/personas-exportacion-prueba.pdf

@@ -8,13 +8,13 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.crudpersona.controller.PersonaController"
             styleClass="root-pane"
-            prefWidth="980.0" prefHeight="660.0">
+            prefWidth="1060.0" prefHeight="750.0">
 
     <top>
         <VBox styleClass="cabecera" spacing="4.0">
             <padding><Insets top="18.0" right="24.0" bottom="14.0" left="24.0"/></padding>
             <Label text="Gestión de Personas" styleClass="titulo"/>
-            <Label text="Spring Boot + JPA + Lombok + SQLite" styleClass="subtitulo"/>
+            <Label text="Directorio de personas" styleClass="subtitulo"/>
         </VBox>
     </top>
 
@@ -25,7 +25,7 @@
             <VBox styleClass="tarjeta" spacing="12.0">
                 <Label text="Datos de la persona" styleClass="tarjeta-titulo"/>
 
-                <GridPane hgap="14.0" vgap="10.0">
+                <GridPane fx:id="formulario" hgap="14.0" vgap="10.0">
                     <columnConstraints>
                         <ColumnConstraints minWidth="90.0"/>
                         <ColumnConstraints prefWidth="240.0"/>
@@ -58,6 +58,8 @@
                                GridPane.rowIndex="2" GridPane.columnIndex="3"/>
                 </GridPane>
 
+                <Label fx:id="lblAuditoria" text="Selecciona un registro para consultar su auditoría."
+                       styleClass="subtitulo" wrapText="true"/>
                 <Separator/>
 
                 <HBox spacing="10.0">
@@ -72,7 +74,13 @@
             </VBox>
 
             <VBox styleClass="tarjeta" spacing="10.0" VBox.vgrow="ALWAYS">
-                <Label text="Registros" styleClass="tarjeta-titulo"/>
+                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                    <Label text="Registros" styleClass="tarjeta-titulo"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="btnActualizar" text="Actualizar" onAction="#onActualizar"/>
+                    <Button fx:id="btnExcel" text="Exportar Excel" onAction="#onExportarExcel"/>
+                    <Button fx:id="btnPdf" text="Exportar PDF" onAction="#onExportarPdf"/>
+                </HBox>
 
                 <TableView fx:id="tabla" VBox.vgrow="ALWAYS" styleClass="striped">
                     <columns>
@@ -97,9 +105,10 @@
     </center>
 
     <bottom>
-        <HBox styleClass="barra-estado">
+        <HBox styleClass="barra-estado" spacing="10.0" alignment="CENTER_LEFT">
             <padding><Insets top="8.0" right="24.0" bottom="10.0" left="24.0"/></padding>
-            <Label fx:id="lblEstado" text="Listo."/>
+            <ProgressIndicator fx:id="progreso" prefWidth="18.0" prefHeight="18.0" visible="false" managed="false"/>
+            <Label fx:id="lblEstado" text="Listo." wrapText="true"/>
         </HBox>
     </bottom>
 </BorderPane>

@@ -36,15 +36,17 @@ try {
     $inputDirectory = Join-Path $projectRoot ("target\jpackage-input-" + [guid]::NewGuid())
     New-Item -ItemType Directory -Path $inputDirectory | Out-Null
     Copy-Item -LiteralPath $jar -Destination $inputDirectory
-    $destination = Join-Path $projectRoot 'instalador'
+    $destination = if ($Type -eq 'app-image') {
+        Join-Path $projectRoot "instalador\portable-$version"
+    } else { Join-Path $projectRoot 'instalador' }
     New-Item -ItemType Directory -Path $destination -Force | Out-Null
     $outputName = if ($Type -eq 'app-image') { 'GestionPersonas' } else { "GestionPersonas-$version.$Type" }
     if (Test-Path -LiteralPath (Join-Path $destination $outputName)) {
-        throw "Ya existe instalador\$outputName. Mueve el paquete anterior antes de generar otro."
+        throw "Ya existe $(Join-Path $destination $outputName). Mueve el paquete anterior antes de generar otro."
     }
     $arguments = @('--type', $Type, '--name', 'GestionPersonas', '--app-version', $version,
         '--input', $inputDirectory, '--main-jar', $jarName, '--dest', $destination,
-        '--description', 'Sistema CRUD de personas con JavaFX y SQLite',
+        '--description', 'Gestión de personas con JavaFX y Supabase PostgreSQL',
         '--java-options', '-Dfile.encoding=UTF-8')
     # El JAR Spring Boot usa JarLauncher en Main-Class y Launcher en Start-Class.
     # jpackage toma Main-Class directamente del manifiesto.

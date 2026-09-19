@@ -1,0 +1,8 @@
+ALTER TABLE persona
+    ADD COLUMN creado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ADD COLUMN actualizado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ADD COLUMN creado_por VARCHAR(120) NOT NULL DEFAULT 'migracion',
+    ADD COLUMN actualizado_por VARCHAR(120) NOT NULL DEFAULT 'migracion',
+    ADD COLUMN version BIGINT NOT NULL DEFAULT 0;
+
+CREATE INDEX idx_persona_actualizado_en ON persona (actualizado_en);

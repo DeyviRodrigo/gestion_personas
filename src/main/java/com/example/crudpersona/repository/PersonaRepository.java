@@ -19,9 +19,9 @@ public interface PersonaRepository extends JpaRepository<Persona, Long> {
 
     @Query("""
             SELECT p FROM Persona p
-            WHERE LOWER(p.nombre)   LIKE LOWER(CONCAT('%', :texto, '%'))
-               OR LOWER(p.apellido) LIKE LOWER(CONCAT('%', :texto, '%'))
-               OR p.dni             LIKE CONCAT('%', :texto, '%')
+            WHERE LOWER(p.nombre)   LIKE LOWER(CONCAT('%', :texto, '%')) ESCAPE '\\'
+               OR LOWER(p.apellido) LIKE LOWER(CONCAT('%', :texto, '%')) ESCAPE '\\'
+               OR p.dni             LIKE CONCAT('%', :texto, '%') ESCAPE '\\'
             """)
     Page<Persona> buscar(@Param("texto") String texto, Pageable pageable);
 }

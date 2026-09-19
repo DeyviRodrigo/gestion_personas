@@ -1,12 +1,15 @@
 package com.example.crudpersona.service;
 
 import com.example.crudpersona.exception.NegocioException;
+import com.example.crudpersona.dto.PersonaDto;
 import com.example.crudpersona.model.Persona;
+import com.example.crudpersona.mapper.PersonaMapper;
+import com.example.crudpersona.support.PostgresTestDatabase;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import com.example.crudpersona.repository.PersonaRepository;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +19,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-import java.nio.file.Path;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -25,13 +27,14 @@ import static org.assertj.core.api.Assertions.*;
 @SpringBootTest(properties = {"spring.jpa.show-sql=false", "logging.level.org.hibernate.SQL=WARN"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class PersonaServiceIntegrationTest {
-    @TempDir static Path directorio;
+    @RegisterExtension static PostgresTestDatabase database = new PostgresTestDatabase();
+    @Autowired PersonaMapper mapper;
     @Autowired PersonaService service;
     @Autowired PersonaRepository repository;
 
     @DynamicPropertySource
     static void baseDePrueba(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", () -> "jdbc:sqlite:" + directorio.resolve("personas.db"));
+        database.configure(registry);
     }
 
     @BeforeEach
@@ -39,31 +42,31 @@ class PersonaServiceIntegrationTest {
         repository.deleteAllInBatch();
     }
 
-    static Persona persona(String dni) {
-        return Persona.builder().nombre("Ana").apellido("Torres").dni(dni)
+    static PersonaDto persona(String dni) {
+        return PersonaDto.builder().nombre("Ana").apellido("Torres").dni(dni)
                 .email("ana@example.com").telefono("987654321").build();
     }
 
     @Test
     void creaLeeActualizaYElimina() {
-        Persona guardada = service.guardar(persona("12345678"));
+        PersonaDto guardada = service.guardar(persona("12345678"));
         assertThat(guardada.getId()).isPositive();
-        Persona leida = service.listar(null, 0).getContent().get(0);
+        PersonaDto leida = service.listar(null, 0).getContent().get(0);
         assertThat(leida.getNombreCompleto()).isEqualTo("Ana Torres");
         leida.setNombre("Andrea");
         assertThat(service.guardar(leida).getId()).isEqualTo(guardada.getId());
         assertThat(repository.findById(guardada.getId()).orElseThrow().getNombre()).isEqualTo("Andrea");
         assertThat(service.contar()).isEqualTo(1);
-        service.eliminar(guardada.getId());
+        service.eliminar(guardada.getId(), service.listar(null, 0).getContent().get(0).getVersion());
         assertThat(service.contar()).isZero();
     }
 
     @Test
     void rechazaDniDuplicadoAlCrearYActualizar() {
-        Persona primera = service.guardar(persona("12345678"));
+        PersonaDto primera = service.guardar(persona("12345678"));
         assertThatThrownBy(() -> service.guardar(persona("12345678")))
-                .isInstanceOf(NegocioException.class).hasMessageContaining("DNI 12345678");
-        Persona segunda = service.guardar(persona("87654321"));
+                .isInstanceOf(NegocioException.class).hasMessageContaining("DNI");
+        PersonaDto segunda = service.guardar(persona("87654321"));
         segunda.setDni(primera.getDni());
         assertThatThrownBy(() -> service.guardar(segunda)).isInstanceOf(NegocioException.class);
         assertThat(repository.findById(segunda.getId()).orElseThrow().getDni()).isEqualTo("87654321");
@@ -71,27 +74,29 @@ class PersonaServiceIntegrationTest {
     }
 
     @Test
-    void sqliteTambienImpideDniDuplicado() {
+    void postgresTambienImpideDniDuplicado() {
         service.guardar(persona("12345678"));
-        assertThatThrownBy(() -> repository.saveAndFlush(persona("12345678")))
-                .isInstanceOf(DataAccessException.class).hasMessageContaining("SQLITE_CONSTRAINT_UNIQUE");
+        Persona duplicada = new Persona();
+        mapper.actualizar(persona("12345678"), duplicada);
+        assertThatThrownBy(() -> repository.saveAndFlush(duplicada))
+                .isInstanceOf(DataAccessException.class).hasMessageContaining("uk_persona_dni");
         assertThat(service.contar()).isEqualTo(1);
     }
 
     @Test
     void permiteCamposOpcionalesVaciosONulos() {
-        Persona vacia = persona("12345678");
+        PersonaDto vacia = persona("12345678");
         vacia.setEmail("");
         vacia.setTelefono("");
         service.guardar(vacia);
-        Persona nula = persona("87654321");
+        PersonaDto nula = persona("87654321");
         nula.setEmail(null);
         nula.setTelefono(null);
         service.guardar(nula);
         assertThat(service.contar()).isEqualTo(2);
     }
 
-    static Stream<Consumer<Persona>> datosInvalidos() {
+    static Stream<Consumer<PersonaDto>> datosInvalidos() {
         return Stream.of(p -> p.setNombre(" "), p -> p.setNombre("a".repeat(61)),
                 p -> p.setApellido(""), p -> p.setApellido("a".repeat(61)),
                 p -> p.setDni("12345"), p -> p.setDni("abcdefgh"), p -> p.setDni(null),
@@ -101,8 +106,8 @@ class PersonaServiceIntegrationTest {
 
     @ParameterizedTest
     @MethodSource("datosInvalidos")
-    void validaAntesDePersistir(Consumer<Persona> invalidar) {
-        Persona persona = persona("12345678");
+    void validaAntesDePersistir(Consumer<PersonaDto> invalidar) {
+        PersonaDto persona = persona("12345678");
         invalidar.accept(persona);
         assertThatThrownBy(() -> service.guardar(persona)).isInstanceOf(ConstraintViolationException.class);
         assertThat(service.contar()).isZero();
@@ -110,9 +115,9 @@ class PersonaServiceIntegrationTest {
 
     @Test
     void buscaPorNombreApellidoYDniSinDistinguirMayusculas() {
-        Persona persona = service.guardar(persona("12345678"));
+        PersonaDto persona = service.guardar(persona("12345678"));
         for (String filtro : new String[]{" ANA ", "tORRes", "3456"}) {
-            assertThat(service.listar(filtro, 0).getContent()).extracting(Persona::getId)
+            assertThat(service.listar(filtro, 0).getContent()).extracting(PersonaDto::getId)
                     .containsExactly(persona.getId());
         }
         assertThat(service.listar("inexistente", 0)).isEmpty();
@@ -121,12 +126,12 @@ class PersonaServiceIntegrationTest {
     @Test
     void paginaDeQuinceEnQuinceYCuentaResultadosFiltrados() {
         for (int i = 0; i < 31; i++) {
-            Persona persona = persona(String.format("%08d", i));
+            PersonaDto persona = persona(String.format("%08d", i));
             persona.setNombre(i < 16 ? "Ana" : "Luis");
             service.guardar(persona);
         }
         assertThat(service.listar("", 0).getContent()).hasSize(15)
-                .extracting(Persona::getId).isSorted();
+                .extracting(PersonaDto::getId).isSorted();
         assertThat(service.listar("", 1).getContent()).hasSize(15);
         assertThat(service.listar("", 2).getContent()).hasSize(1);
         assertThat(service.listar("", 2).getTotalPages()).isEqualTo(3);
@@ -137,11 +142,34 @@ class PersonaServiceIntegrationTest {
 
     @Test
     void noRecreaUnaPersonaEliminadaAlIntentarEditar() {
-        Persona persona = service.guardar(persona("12345678"));
-        service.eliminar(persona.getId());
+        PersonaDto persona = service.guardar(persona("12345678"));
+        service.eliminar(persona.getId(), persona.getVersion());
         assertThatThrownBy(() -> service.guardar(persona)).isInstanceOf(NegocioException.class);
-        assertThatThrownBy(() -> service.eliminar(persona.getId())).isInstanceOf(NegocioException.class);
-        assertThatThrownBy(() -> service.eliminar(null)).isInstanceOf(NegocioException.class);
+        assertThatThrownBy(() -> service.eliminar(persona.getId(), persona.getVersion())).isInstanceOf(NegocioException.class);
+        assertThatThrownBy(() -> service.eliminar(null, null)).isInstanceOf(NegocioException.class);
         assertThat(service.contar()).isZero();
+    }
+
+    @Test
+    void auditaAltasYEdicionesSinPerderLaFechaOriginal() {
+        PersonaDto inicial = service.guardar(persona("12345678"));
+        assertThat(inicial.getCreadoEn()).isNotNull();
+        assertThat(inicial.getCreadoPor()).isEqualTo("pruebas");
+        PersonaDto obsoleta = inicial.toBuilder().build();
+        inicial.setNombre("Andrea");
+        PersonaDto actualizada = service.guardar(inicial);
+        assertThat(actualizada.getCreadoEn()).isEqualTo(inicial.getCreadoEn());
+        assertThat(actualizada.getActualizadoEn()).isAfterOrEqualTo(inicial.getActualizadoEn());
+        assertThat(actualizada.getVersion()).isEqualTo(inicial.getVersion() + 1);
+        assertThatThrownBy(() -> service.guardar(obsoleta)).isInstanceOf(NegocioException.class);
+        assertThatThrownBy(() -> service.eliminar(obsoleta.getId(), obsoleta.getVersion())).isInstanceOf(NegocioException.class);
+    }
+
+    @Test
+    void exportacionIncluyeTodasLasPaginasYBusquedaTrataPorcentajeComoTexto() {
+        for (int i = 0; i < 18; i++) { service.guardar(persona(String.format("%08d", i))); }
+        assertThat(service.listarParaExportar("Ana")).hasSize(18);
+        assertThat(service.listar("%", 0)).isEmpty();
+        assertThat(service.listar("_", 0)).isEmpty();
     }
 }
